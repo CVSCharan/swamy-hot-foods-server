@@ -1,0 +1,15 @@
+{
+  "name": "swamy-hot-foods-server",
+  "version": "1.0.0",
+  "description": "Server for swamy-hot-foods",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "cvs charan",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1",
+    "ws": "^8.18.0"
+  }
+}
