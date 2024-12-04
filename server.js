@@ -9,13 +9,20 @@ const port = 3001;
 // Use CORS to allow all origins (or specify frontend domain if required)
 const allowedOrigins = [
   "http://localhost:3000", // Local development URL
-  "https://swamy-hot-foods-client-n0yeb3u1n-cvs-charans-projects.vercel.app", // Production frontend URL
+  "https://swamy-hot-foods-client.vercel.app", // Production frontend URL
+  "https://www.swamyshotfoods.shop", // Custom domain with `www`
+  "https://swamyshotfoods.shop", // Custom domain without `www`
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/; // Allow both `www` and non-`www`
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedRegex.test(origin)
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
