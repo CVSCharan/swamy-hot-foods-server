@@ -11,7 +11,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000", // Local development URL
-      "https://swamy-hot-foods-client.vercel.app/*", // Production frontend URL
+      "https://swamy-hot-foods-client-n0yeb3u1n-cvs-charans-projects.vercel.app/*", // Production frontend URL
     ],
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
