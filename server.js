@@ -7,12 +7,20 @@ const app = express();
 const port = 3001;
 
 // Use CORS to allow all origins (or specify frontend domain if required)
+const allowedOrigins = [
+  "http://localhost:3000", // Local development URL
+  "https://swamy-hot-foods-client-n0yeb3u1n-cvs-charans-projects.vercel.app", // Production frontend URL
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000", // Local development URL
-      "https://swamy-hot-foods-client-n0yeb3u1n-cvs-charans-projects.vercel.app/*", // Production frontend URL
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
