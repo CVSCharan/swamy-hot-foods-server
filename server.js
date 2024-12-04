@@ -9,7 +9,10 @@ const port = 3001;
 // Use CORS to allow all origins (or specify frontend domain if required)
 app.use(
   cors({
-    origin: "http://localhost:3000", // Adjust this to your frontend's URL
+    origin: [
+      "http://localhost:3000", // Local development URL
+      "https://swamy-hot-foods-client.vercel.app/shop-status", // Production frontend URL
+    ],
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
