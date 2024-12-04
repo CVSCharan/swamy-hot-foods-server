@@ -130,7 +130,16 @@ app.server = app.listen(port, () => {
 });
 
 app.server.on("upgrade", (request, socket, head) => {
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit("connection", ws, request);
-  });
+  const origin = request.headers.origin;
+
+  // Check if the origin is allowed
+  const allowedOriginsRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/; // Regex for allowed domains
+
+  if (allowedOriginsRegex.test(origin) || allowedOrigins.includes(origin)) {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  } else {
+    socket.destroy(); // Reject connection if the origin is not allowed
+  }
 });
