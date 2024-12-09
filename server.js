@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const WebSocket = require("ws");
 const multer = require("multer");
@@ -141,5 +142,53 @@ app.server.on("upgrade", (request, socket, head) => {
     });
   } else {
     socket.destroy(); // Reject connection if the origin is not allowed
+  }
+});
+
+const axios = require("axios");
+
+// Google Places API key (make sure this is kept secure in .env file)
+const API_KEY = process.env.GOOGLE_API_KEY;
+
+// Google Place ID (replace with your actual Place ID)
+const PLACE_ID = "ChIJmYN2XqONTDoR_zgIHSRpnfI";
+
+// Route to get Google reviews
+let cachedReviews = [];
+let lastFetchTime = null;
+
+const CACHE_EXPIRY_TIME = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+app.get("/api/google-reviews", async (req, res) => {
+  const currentTime = new Date().getTime();
+
+  // Check if cache is still valid (less than 10 minutes old)
+  if (lastFetchTime && currentTime - lastFetchTime < CACHE_EXPIRY_TIME) {
+    return res.status(200).json({
+      reviews: cachedReviews,
+      totalReviews: cachedReviews.length, // Use the cached reviews count
+    });
+  }
+
+  try {
+    // Fetch data from Google API if cache is expired or doesn't exist
+    const response = await axios.get(
+      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,user_ratings_total&key=${API_KEY}`
+    );
+
+    const reviews = response.data.result.reviews || [];
+    const totalReviews = response.data.result.user_ratings_total || 0;
+
+    // Cache the reviews
+    cachedReviews = reviews.slice(0, 10); // Limit to the first 10 reviews
+    lastFetchTime = currentTime; // Update the fetch timestamp
+
+    return res.status(200).json({
+      reviews: cachedReviews,
+      totalReviews: totalReviews, // Send the actual total reviews count from Google API
+    });
+  } catch (error) {
+    console.error("Error fetching Google reviews:", error.message);
+    res.status(500).json({ message: "Failed to fetch reviews from Google." });
   }
 });
