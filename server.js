@@ -13,12 +13,15 @@ const allowedOrigins = [
   "https://swamy-hot-foods-client.vercel.app", // Production frontend URL
   "https://www.swamyshotfoods.shop", // Custom domain with `www`
   "https://swamyshotfoods.shop", // Custom domain without `www`
+  "https://api.swamyshotfoods.shop",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/; // Allow both `www` and non-`www`
+      console.log("Request Origin:", origin); // Debug log
+      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/;
+
       if (
         !origin ||
         allowedOrigins.includes(origin) ||
@@ -26,6 +29,7 @@ app.use(
       ) {
         callback(null, true);
       } else {
+        console.error("Blocked by CORS:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
