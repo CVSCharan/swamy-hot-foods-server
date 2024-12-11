@@ -160,6 +160,7 @@ const PLACE_ID = "ChIJmYN2XqONTDoR_zgIHSRpnfI";
 // Route to get Google reviews
 let cachedReviews = [];
 let lastFetchTime = null;
+let cachedRating = null; // Store the overall rating
 
 const CACHE_EXPIRY_TIME = 10 * 60 * 1000; // 10 minutes in milliseconds
 
@@ -170,26 +171,30 @@ app.get("/api/google-reviews", async (req, res) => {
   if (lastFetchTime && currentTime - lastFetchTime < CACHE_EXPIRY_TIME) {
     return res.status(200).json({
       reviews: cachedReviews,
-      totalReviews: cachedReviews.length, // Use the cached reviews count
+      totalReviews: cachedReviews.length,
+      overallRating: cachedRating,
     });
   }
 
   try {
-    // Fetch data from Google API if cache is expired or doesn't exist
+    // Fetch data from Google Places API
     const response = await axios.get(
-      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,user_ratings_total&key=${API_KEY}`
+      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&key=${API_KEY}`
     );
 
     const reviews = response.data.result.reviews || [];
     const totalReviews = response.data.result.user_ratings_total || 0;
+    const overallRating = response.data.result.rating || 0;
 
-    // Cache the reviews
-    cachedReviews = reviews.slice(0, 10); // Limit to the first 10 reviews
-    lastFetchTime = currentTime; // Update the fetch timestamp
+    // Ensure a minimum of 20 reviews (fetching more if possible)
+    cachedReviews = reviews.length >= 20 ? reviews.slice(0, 20) : reviews;
+    cachedRating = overallRating;
+    lastFetchTime = currentTime;
 
     return res.status(200).json({
       reviews: cachedReviews,
-      totalReviews: totalReviews, // Send the actual total reviews count from Google API
+      totalReviews: totalReviews,
+      overallRating: overallRating,
     });
   } catch (error) {
     console.error("Error fetching Google reviews:", error.message);
