@@ -4,6 +4,7 @@ const WebSocket = require("ws");
 const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
+const axios = require("axios");
 const app = express();
 const port = 3001;
 
@@ -149,8 +150,6 @@ app.server.on("upgrade", (request, socket, head) => {
   }
 });
 
-const axios = require("axios");
-
 // Google Places API key (make sure this is kept secure in .env file)
 const API_KEY = process.env.GOOGLE_API_KEY;
 
@@ -170,8 +169,8 @@ app.get("/api/google-reviews", async (req, res) => {
   // Check if cache is still valid (less than 10 minutes old)
   if (lastFetchTime && currentTime - lastFetchTime < CACHE_EXPIRY_TIME) {
     return res.status(200).json({
-      reviews: cachedReviews,
-      totalReviews: cachedReviews.length,
+      reviews: cachedReviews, // Return the cached reviews
+      totalReviews: cachedTotalReviews, // Return the cached totalReviews (not relying on cachedReviews.length)
       overallRating: cachedRating,
     });
   }
@@ -188,12 +187,13 @@ app.get("/api/google-reviews", async (req, res) => {
 
     // Ensure a minimum of 20 reviews (fetching more if possible)
     cachedReviews = reviews.length >= 20 ? reviews.slice(0, 20) : reviews;
+    cachedTotalReviews = totalReviews; // Cache the actual totalReviews value
     cachedRating = overallRating;
     lastFetchTime = currentTime;
 
     return res.status(200).json({
       reviews: cachedReviews,
-      totalReviews: totalReviews,
+      totalReviews: cachedTotalReviews, // Return the actual totalReviews value
       overallRating: overallRating,
     });
   } catch (error) {
