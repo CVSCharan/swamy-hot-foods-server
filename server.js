@@ -10,16 +10,35 @@ const port = 3001;
 
 // Use CORS to allow all origins (or specify frontend domain if required)
 const allowedOrigins = [
-  "http://localhost:3000", // Local development URL
-  "http://10.0.2.2:3000", // Android Emulator (use the IP address for Android)
-  "http://localhost:3000", // iOS Simulator
-  "https://swamy-hot-foods-client.vercel.app", // Production frontend URL
-  "https://www.swamyshotfoods.shop", // Custom domain with `www`
-  "https://swamyshotfoods.shop", // Custom domain without `www`
-  "https://api.swamyshotfoods.shop", // Custom API domain
+  "http://localhost:3000",
+  "http://10.0.2.2:3000",
+  "http://10.0.2.2:3001",
+  "https://swamy-hot-foods-client.vercel.app",
+  "https://swamyshotfoods.shop",
+  "https://www.swamyshotfoods.shop",
 ];
 
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      console.log("Request Origin:", origin); // Debug log
+      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop(:443)?$/;
+
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedRegex.test(origin)
+      ) {
+        callback(null, true);
+      } else {
+        console.error("Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Create an HTTP server
 const server = app.listen(port, () => {
@@ -29,8 +48,21 @@ const server = app.listen(port, () => {
 // Set up Socket.IO with the HTTP server
 const io = socketIo(server, {
   cors: {
-    origin: "*", // Temporarily allow all origins
-    methods: ["GET", "POST"],
+    origin: (origin, callback) => {
+      console.log("Socket.io Request Origin:", origin); // Debug log
+      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop(:443)?$/;
+
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedRegex.test(origin)
+      ) {
+        callback(null, true);
+      } else {
+        console.error("Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
   },
 });
 
