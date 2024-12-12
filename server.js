@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const WebSocket = require("ws");
+const socketIo = require("socket.io"); // Importing socket.io
 const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
@@ -11,10 +11,12 @@ const port = 3001;
 // Use CORS to allow all origins (or specify frontend domain if required)
 const allowedOrigins = [
   "http://localhost:3000", // Local development URL
+  "http://10.0.2.2:3000", // Android Emulator (use the IP address for Android)
+  "http://localhost:3000", // iOS Simulator
   "https://swamy-hot-foods-client.vercel.app", // Production frontend URL
   "https://www.swamyshotfoods.shop", // Custom domain with `www`
   "https://swamyshotfoods.shop", // Custom domain without `www`
-  "https://api.swamyshotfoods.shop",
+  "https://api.swamyshotfoods.shop", // Custom API domain
 ];
 
 app.use(
@@ -39,8 +41,31 @@ app.use(
   })
 );
 
-// Create a WebSocket server
-const wss = new WebSocket.Server({ noServer: true });
+// Create an HTTP server
+const server = app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+// Set up Socket.IO with the HTTP server
+const io = socketIo(server, {
+  cors: {
+    origin: (origin, callback) => {
+      console.log("Socket.io Request Origin:", origin); // Debug log
+      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/;
+
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedRegex.test(origin)
+      ) {
+        callback(null, true);
+      } else {
+        console.error("Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  },
+});
 
 // Current shop and cooking status
 let shopStatus = false; // Initial shop status
@@ -52,25 +77,21 @@ const logStatusChange = (type, newValue) => {
   console.log(`[${timestamp}] ${type} toggled to: ${newValue}`);
 };
 
-// Set up WebSocket connection
-wss.on("connection", (ws) => {
+// Socket.IO connection logic
+io.on("connection", (socket) => {
+  console.log("New client connected");
+
   // Send the current statuses to the new client
-  ws.send(JSON.stringify({ shopStatus, cooking }));
+  socket.emit("statusUpdate", { shopStatus, cooking });
 
   // Listen for state changes from any client
-  ws.on("message", (message) => {
-    const data = JSON.parse(message);
-
+  socket.on("statusChange", (data) => {
     if (data.shopStatus !== undefined) {
       shopStatus = data.shopStatus; // Update shop status
       logStatusChange("Shop Status", shopStatus);
 
       // Broadcast the new shop status to all connected clients
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ shopStatus }));
-        }
-      });
+      io.emit("statusUpdate", { shopStatus });
     }
 
     if (data.cooking !== undefined) {
@@ -78,12 +99,13 @@ wss.on("connection", (ws) => {
       logStatusChange("Cooking Status", cooking);
 
       // Broadcast the new cooking status to all connected clients
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ cooking }));
-        }
-      });
+      io.emit("statusUpdate", { cooking });
     }
+  });
+
+  // Handle disconnect event
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
   });
 });
 
@@ -128,26 +150,6 @@ app.get("/", (req, res) => {
 app.get("/api/ping", (req, res) => {
   console.info("Server is alive!");
   res.status(200).send("Server is alive!");
-});
-
-// Set up HTTP server to handle WebSocket upgrades
-app.server = app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
-
-app.server.on("upgrade", (request, socket, head) => {
-  const origin = request.headers.origin;
-
-  // Check if the origin is allowed
-  const allowedOriginsRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/; // Regex for allowed domains
-
-  if (allowedOriginsRegex.test(origin) || allowedOrigins.includes(origin)) {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit("connection", ws, request);
-    });
-  } else {
-    socket.destroy(); // Reject connection if the origin is not allowed
-  }
 });
 
 // Google Places API key (make sure this is kept secure in .env file)
