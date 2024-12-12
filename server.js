@@ -48,21 +48,10 @@ const server = app.listen(port, () => {
 // Set up Socket.IO with the HTTP server
 const io = socketIo(server, {
   cors: {
-    origin: (origin, callback) => {
-      console.log("Socket.io Request Origin:", origin); // Debug log
-      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop(:443)?$/;
-
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        allowedRegex.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        console.error("Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "*", // Allows all origins
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"], // Optional: You can allow specific headers
+    credentials: true, // Optional: Allows credentials if necessary
   },
 });
 
