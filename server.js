@@ -22,23 +22,9 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      console.log("Request Origin:", origin); // Debug log
-      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/;
-
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        allowedRegex.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        console.error("Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: true, // Allow all origins
+    methods: ["GET", "POST"], // Allow specific HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
   })
 );
 
