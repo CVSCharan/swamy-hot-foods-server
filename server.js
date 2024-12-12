@@ -19,27 +19,7 @@ const allowedOrigins = [
   "https://api.swamyshotfoods.shop", // Custom API domain
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      console.log("Request Origin:", origin); // Debug log
-      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop(:443)?$/;
-
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        allowedRegex.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        console.error("Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({ origin: "*" }));
 
 // Create an HTTP server
 const server = app.listen(port, () => {
@@ -49,21 +29,8 @@ const server = app.listen(port, () => {
 // Set up Socket.IO with the HTTP server
 const io = socketIo(server, {
   cors: {
-    origin: (origin, callback) => {
-      console.log("Socket.io Request Origin:", origin); // Debug log
-      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop(:443)?$/;
-
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        allowedRegex.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        console.error("Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "*", // Temporarily allow all origins
+    methods: ["GET", "POST"],
   },
 });
 
