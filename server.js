@@ -23,7 +23,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       console.log("Request Origin:", origin); // Debug log
-      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/;
+      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop(:443)?$/;
 
       if (
         !origin ||
@@ -51,7 +51,7 @@ const io = socketIo(server, {
   cors: {
     origin: (origin, callback) => {
       console.log("Socket.io Request Origin:", origin); // Debug log
-      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop$/;
+      const allowedRegex = /^https:\/\/(www\.)?swamyshotfoods\.shop(:443)?$/;
 
       if (
         !origin ||
