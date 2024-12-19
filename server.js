@@ -59,6 +59,7 @@ const io = socketIo(server, {
 let shopStatus = false; // Initial shop status
 let cooking = false; // Initial cooking status
 let holiday = false; // Initial holiday status
+let holidayPlaceholder = "It's a Holiday Today"; // Initial holiday placeholder text
 
 // Logging utility
 const logStatusChange = (type, newValue) => {
@@ -71,7 +72,12 @@ io.on("connection", (socket) => {
   console.log("New client connected");
 
   // Send the current statuses to the new client
-  socket.emit("statusUpdate", { shopStatus, cooking, holiday });
+  socket.emit("statusUpdate", {
+    shopStatus,
+    cooking,
+    holiday,
+    holidayPlaceholder,
+  });
 
   // Listen for state changes from any client
   socket.on("statusChange", (data) => {
@@ -97,6 +103,14 @@ io.on("connection", (socket) => {
 
       // Broadcast the new shop status to all connected clients
       io.emit("statusUpdate", { holiday });
+    }
+
+    if (data.holidayPlaceholder !== undefined) {
+      holidayPlaceholder = data.holidayPlaceholder; // Update Holiday status
+      logStatusChange("Holiday Text", holidayPlaceholder);
+
+      // Broadcast the new shop status to all connected clients
+      io.emit("statusUpdate", { holidayPlaceholder });
     }
   });
 
