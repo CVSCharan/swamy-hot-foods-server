@@ -124,6 +124,9 @@ io.on("connection", (socket) => {
   // Calculate the current shop status message
   const currentStatusMsg = getShopMessage(shopStatus);
 
+  // Calculate the updated shop message
+  const updatedStatusMsg = getShopMessage(shopStatus);
+
   // Send the current statuses to the new client
   socket.emit("statusUpdate", {
     shopStatus,
@@ -132,7 +135,7 @@ io.on("connection", (socket) => {
     holidayTxt,
     noticeBoard,
     noticeBoardTxt,
-    currentStatusMsg, // Send the current status message
+    currentStatusMsg: updatedStatusMsg,
   });
 
   // Listen for state changes from any client
@@ -140,49 +143,50 @@ io.on("connection", (socket) => {
     if (data.shopStatus !== undefined) {
       shopStatus = data.shopStatus; // Update shop status
       logStatusChange("Shop Status", shopStatus);
+
+      // Broadcast the new shop status to all connected clients
+      io.emit("statusUpdate", { shopStatus });
     }
 
     if (data.cooking !== undefined) {
       cooking = data.cooking; // Update cooking status
       logStatusChange("Cooking Status", cooking);
+
+      // Broadcast the new cooking status to all connected clients
+      io.emit("statusUpdate", { cooking });
     }
 
     if (data.holiday !== undefined) {
-      holiday = data.holiday; // Update holiday status
+      holiday = data.holiday; // Update Holiday status
       logStatusChange("Holiday", holiday);
+
+      // Broadcast the new shop status to all connected clients
+      io.emit("statusUpdate", { holiday });
     }
 
     if (data.holidayTxt !== undefined) {
-      holidayTxt = data.holidayTxt; // Update holiday text
+      holidayTxt = data.holidayTxt; // Update HolidayTxt status
       logStatusChange("HolidayTxt", holidayTxt);
+
+      // Broadcast the new shop status to all connected clients
+      io.emit("statusUpdate", { holidayTxt });
     }
 
     if (data.noticeBoard !== undefined) {
-      noticeBoard = data.noticeBoard; // Update notice board status
+      noticeBoard = data.noticeBoard; // Update Holiday status
       logStatusChange("NoticeBoard Status", noticeBoard);
+
+      // Broadcast the new shop status to all connected clients
+      io.emit("statusUpdate", { noticeBoard });
     }
 
     if (data.noticeBoardTxt !== undefined) {
-      noticeBoardTxt = data.noticeBoardTxt; // Update notice board text
+      noticeBoardTxt = data.noticeBoardTxt; // Update Holiday status
       logStatusChange("NoticeBoard Text", noticeBoardTxt);
+
+      // Broadcast the new shop status to all connected clients
+      io.emit("statusUpdate", { noticeBoardTxt });
     }
-
-    // Calculate the updated shop message
-    const updatedStatusMsg = () => {
-      logStatusChange("Current Status Msg Text", getShopMessage(shopStatus));
-      return getShopMessage(shopStatus);
-    };
-
-    // Broadcast the updated statuses and message to all connected clients
-    io.emit("statusUpdate", {
-      shopStatus,
-      cooking,
-      holiday,
-      holidayTxt,
-      noticeBoard,
-      noticeBoardTxt,
-      currentStatusMsg: updatedStatusMsg, // Include the updated status message
-    });
   });
 
   // Handle disconnect event
