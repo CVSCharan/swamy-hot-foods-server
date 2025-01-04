@@ -16,6 +16,7 @@ const allowedOrigins = [
   "https://swamy-hot-foods-client.vercel.app",
   "https://swamyshotfoods.shop",
   "https://www.swamyshotfoods.shop",
+  "https://swamy-hot-foods-client-5ozpne27r-cvs-charans-projects.vercel.app",
 ];
 
 app.use(
