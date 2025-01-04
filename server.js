@@ -69,63 +69,9 @@ const logStatusChange = (type, newValue) => {
   console.log(`[${timestamp}] ${type} toggled to: ${newValue}`);
 };
 
-// Function to determine shop message based on the current time and shop status
-const getShopMessage = (shopStatus) => {
-  const now = new Date();
-  const currentHours = now.getHours();
-  const currentMinutes = now.getMinutes();
-  const currentTime = currentHours * 60 + currentMinutes; // Convert current time to minutes for easier comparison
-
-  const morningClosingSoonStart = 10 * 60 + 45; // 10:45 AM
-  const morningClosingSoonEnd = 12 * 60; // 12:00 PM
-  const afternoonClosedStart = 11 * 60; // 11:00 AM
-  const afternoonClosedEnd = 16 * 60 + 29; // 4:29 PM
-  const eveningClosingSoonStart = 20 * 60 + 45; // 8:45 PM
-  const eveningClosingSoonEnd = 23 * 60; // 11:00 PM
-  const nightClosedStart = 21 * 60; // 9:00 PM
-  const nightClosedEnd = 23 * 60; // 11:00 PM
-
-  let message = "";
-
-  // Check the shop status message conditions
-  if (shopStatus) {
-    if (
-      currentTime >= morningClosingSoonStart &&
-      currentTime < morningClosingSoonEnd
-    ) {
-      message = "Closing soon";
-    } else if (
-      currentTime >= eveningClosingSoonStart &&
-      currentTime < eveningClosingSoonEnd
-    ) {
-      message = "Closing soon";
-    }
-  } else {
-    if (
-      currentTime >= afternoonClosedStart &&
-      currentTime <= afternoonClosedEnd
-    ) {
-      message = "Shop opens at 4:30 PM";
-    } else if (
-      currentTime >= nightClosedStart &&
-      currentTime <= nightClosedEnd
-    ) {
-      message = "Shop opens at 5:30 AM";
-    }
-  }
-
-  return message; // Return the determined shop message
-};
-
 // Socket.IO connection logic
 io.on("connection", (socket) => {
   console.log("New client connected");
-
-  // Calculate the current shop status message
-  const currentStatusMsg = getShopMessage(shopStatus);
-
-  // Calculate the updated shop message
-  const updatedStatusMsg = getShopMessage(shopStatus);
 
   // Send the current statuses to the new client
   socket.emit("statusUpdate", {
@@ -135,7 +81,6 @@ io.on("connection", (socket) => {
     holidayTxt,
     noticeBoard,
     noticeBoardTxt,
-    currentStatusMsg: updatedStatusMsg,
   });
 
   // Listen for state changes from any client
