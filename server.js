@@ -6,7 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const axios = require("axios");
 const app = express();
-const port = 4001;
+const port = 3001;
 
 // Use CORS to allow all origins (or specify frontend domain if required)
 const allowedOrigins = [
