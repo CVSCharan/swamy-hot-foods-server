@@ -71,50 +71,63 @@ const logStatusChange = (type, newValue) => {
 
 // Function to determine shop message based on the current time and shop status
 const getShopMessage = (shopStatus) => {
+  // Convert server time to Indian Standard Time (IST)
   const now = new Date();
-  const currentHours = now.getHours();
-  const currentMinutes = now.getMinutes();
-  const currentTime = currentHours * 60 + currentMinutes; // Convert current time to minutes for easier comparison
+  const utcOffsetMinutes = now.getTimezoneOffset(); // Time difference from UTC in minutes
+  const istOffsetMinutes = 330; // IST is UTC+5:30
+  const istTime = new Date(
+    now.getTime() + (istOffsetMinutes - utcOffsetMinutes) * 60 * 1000
+  );
 
-  const morningClosingSoonStart = 10 * 60 + 45; // 10:45 AM
-  const morningClosingSoonEnd = 12 * 60; // 12:00 PM
-  const afternoonClosedStart = 11 * 60; // 11:00 AM
-  const afternoonClosedEnd = 16 * 60 + 29; // 4:29 PM
-  const eveningClosingSoonStart = 20 * 60 + 45; // 8:45 PM
-  const eveningClosingSoonEnd = 23 * 60; // 11:00 PM
-  const nightClosedStart = 21 * 60; // 9:00 PM
-  const nightClosedEnd = 23 * 60; // 11:00 PM
+  const currentDay = istTime.getDay(); // 0 (Sunday) to 6 (Saturday)
+  const currentHours = istTime.getHours();
+  const currentMinutes = istTime.getMinutes();
+  const currentTime = currentHours * 60 + currentMinutes; // Current time in minutes for easier comparison
+
+  // Define shop timings in IST
+  const morningOpen = 5 * 60 + 30; // 5:30 AM
+  const morningClose = 11 * 60; // 11:00 AM
+  const eveningOpen = 16 * 60 + 30; // 4:30 PM
+  const eveningClose = 21 * 60; // 9:00 PM
+
+  // Define "closing soon" periods
+  const morningClosingSoon = morningClose - 15; // 10:45 AM
+  const eveningClosingSoon = eveningClose - 15; // 8:45 PM
 
   let message = "";
 
-  // Check the shop status message conditions
+  // Check for holidays
+  if (currentDay === 0) {
+    // Sunday: Show nothing
+    return message; // Empty message
+  }
+  if (currentDay === 6 && currentTime > eveningClose) {
+    // Saturday evening after shop closes: Show nothing
+    return message; // Empty message
+  }
+
+  // Determine the message based on shopStatus and time
   if (shopStatus) {
+    // Shop is open
     if (
-      currentTime >= morningClosingSoonStart &&
-      currentTime < morningClosingSoonEnd
-    ) {
-      message = "Closing soon";
-    } else if (
-      currentTime >= eveningClosingSoonStart &&
-      currentTime < eveningClosingSoonEnd
+      (currentTime >= morningClosingSoon && currentTime <= morningClose) ||
+      (currentTime >= eveningClosingSoon && currentTime <= eveningClose)
     ) {
       message = "Closing soon";
     }
   } else {
-    if (
-      currentTime >= afternoonClosedStart &&
-      currentTime <= afternoonClosedEnd
-    ) {
+    // Shop is closed
+    if (currentTime > morningClose && currentTime < eveningOpen) {
       message = "Shop opens at 4:30 PM";
     } else if (
-      currentTime >= nightClosedStart &&
-      currentTime <= nightClosedEnd
+      (currentTime > eveningClose && currentTime < 24 * 60) ||
+      (currentTime >= 0 && currentTime < morningOpen)
     ) {
       message = "Shop opens at 5:30 AM";
     }
   }
 
-  return message; // Return the determined shop message
+  return message; // Return the appropriate message
 };
 
 // Socket.IO connection logic
