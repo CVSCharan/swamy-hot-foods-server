@@ -86,9 +86,9 @@ const getShopMessage = (shopStatus) => {
 
   // Define shop timings in IST
   const morningOpen = 5 * 60 + 30; // 5:30 AM
-  const morningClose = 11 * 60; // 11:00 AM
+  const morningClose = 11 * 60 + 30; // 11:30 AM
   const eveningOpen = 16 * 60 + 30; // 4:30 PM
-  const eveningClose = 21 * 60; // 9:00 PM
+  const eveningClose = 21 * 60 + 30; // 9:30 PM
 
   // Define "closing soon" periods
   const morningClosingSoon = morningClose - 15; // 10:45 AM
@@ -113,7 +113,7 @@ const getShopMessage = (shopStatus) => {
       (currentTime >= morningClosingSoon && currentTime <= morningClose) ||
       (currentTime >= eveningClosingSoon && currentTime <= eveningClose)
     ) {
-      message = "Closing soon";
+      message = "Closing soon..!";
     }
   } else {
     // Shop is closed
