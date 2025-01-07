@@ -85,14 +85,14 @@ const getShopMessage = (shopStatus) => {
   const currentTime = currentHours * 60 + currentMinutes; // Current time in minutes for easier comparison
 
   // Define shop timings in IST
-  const morningOpen = 5 * 60 + 30; // 5:30 AM
+  const morningOpen = 5 * 60; // 5:00 AM
   const morningClose = 11 * 60 + 30; // 11:30 AM
   const eveningOpen = 16 * 60 + 30; // 4:30 PM
   const eveningClose = 21 * 60 + 30; // 9:30 PM
 
   // Define "closing soon" periods
-  const morningClosingSoon = morningClose - 15; // 10:45 AM
-  const eveningClosingSoon = eveningClose - 15; // 8:45 PM
+  const morningClosingSoon = 10 * 60 + 45; // 10:45 AM
+  const eveningClosingSoon = 20 * 60 + 45; // 8:45 PM
 
   let message = "";
 
