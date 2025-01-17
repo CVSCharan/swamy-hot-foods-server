@@ -6,6 +6,10 @@ const cors = require("cors");
 const path = require("path");
 const axios = require("axios");
 const app = express();
+const connectDB = require("./config/db");
+const bodyParser = require("body-parser");
+
+const menuRoutes = require("./routes/menuRoutes");
 const port = 3001;
 
 // Use CORS to allow all origins (or specify frontend domain if required)
@@ -17,6 +21,12 @@ const allowedOrigins = [
   "https://swamyshotfoods.shop",
   "https://www.swamyshotfoods.shop",
 ];
+
+// Middleware
+app.use(bodyParser.json());
+
+// Connect to Database
+connectDB();
 
 app.use(
   cors({
@@ -45,6 +55,8 @@ const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
+app.use("/api/menu", menuRoutes);
+
 // Set up Socket.IO with the HTTP server
 const io = socketIo(server, {
   cors: {
@@ -62,6 +74,7 @@ let holiday = false; // Initial holiday status
 let noticeBoard = false; // Initial holiday status
 let holidayTxt = "Enter Holiday Text..!"; // Initial holiday placeholder text
 let noticeBoardTxt = "Enter Notice Board Text..!"; // Initial noticeBoard placeholder text
+let shopDesc = "Swamy's Hot Foods is a pure veg destination.";
 
 // Logging utility
 const logStatusChange = (type, newValue) => {
@@ -86,7 +99,7 @@ const getShopMessage = (shopStatus) => {
 
   // Define shop timings in IST
   const morningOpen = 5 * 60; // 5:00 AM
-  const morningClose = 11 * 60 + 30; // 11:30 AM
+  const morningClose = 11 * 60 + 59; // 11:59 AM
   const eveningOpen = 16 * 60 + 30; // 4:30 PM
   const eveningClose = 21 * 60 + 30; // 9:30 PM
 
@@ -235,7 +248,7 @@ app.use("/uploads", cors(), express.static(path.join(__dirname, "uploads")));
 
 // Root route
 app.get("/", (req, res) => {
-  res.send("Welcome to Swamy Hot Foods Server");
+  res.status(200).send("Welcome to Swamy Hot Foods Server");
 });
 
 // Poling the server for activeness
@@ -294,4 +307,23 @@ app.get("/api/google-reviews", async (req, res) => {
     console.error("Error fetching Google reviews:", error.message);
     res.status(500).json({ message: "Failed to fetch reviews from Google." });
   }
+});
+
+app.get("/api/shop/desc", (req, res) => {
+  res.status(200).send({ message: "Swamy's Hot Foods Desc", desc: shopDesc });
+});
+
+app.post("/api/shop/desc", (req, res) => {
+  const { newDesc } = req.body; // Expecting a newDesc field in the body of the request.
+
+  if (!newDesc) {
+    return res.status(400).send({ message: "New description is required." });
+  }
+
+  shopDesc = newDesc; // Update the shop description with the new one.
+
+  res.status(200).send({
+    message: "Shop description updated successfully.",
+    desc: shopDesc,
+  });
 });
