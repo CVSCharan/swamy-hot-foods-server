@@ -109,14 +109,19 @@ const getShopMessage = (shopStatus) => {
 
   let message = "";
 
-  // Check for holidays
-  if (currentDay === 0) {
-    // Sunday: Show nothing
-    return message; // Empty message
+  // **Special Condition for Saturday Evening**
+  if (currentDay === 6 && currentTime > eveningClosingSoon) {
+    return "☀️ Sunday's Holiday";
   }
-  if (currentDay === 6 && currentTime > eveningClose) {
-    // Saturday evening after shop closes: Show nothing
-    return message; // Empty message
+
+  // **Special Condition for Sunday Evening after shop closing time**
+  if (currentDay === 0 && currentTime > eveningClose) {
+    return "Shop Opens at 5:30 AM";
+  }
+
+  // **Sunday (Holiday) - Show "Sunday's Holiday" all day**
+  if (currentDay === 0) {
+    return "☀️ Sunday's Holiday";
   }
 
   // Determine the message based on shopStatus and time
