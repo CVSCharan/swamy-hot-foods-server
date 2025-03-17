@@ -10,7 +10,7 @@ const connectDB = require("./config/db");
 const bodyParser = require("body-parser");
 
 const menuRoutes = require("./routes/menuRoutes");
-const port = 3001;
+const port = 3010;
 
 // Use CORS to allow all origins (or specify frontend domain if required)
 const allowedOrigins = [
