@@ -168,13 +168,26 @@ io.on("connection", (socket) => {
 
   // Listen for state changes from any client
   socket.on("statusChange", (data) => {
-    if (data.shopStatus !== undefined) {
-      shopStatus = data.shopStatus; // Update shop status
+    // If shopStatus is being set to true and cooking is already true
+    if (data.shopStatus === true && cooking === true) {
+      cooking = false; // Turn off cooking when shop status becomes true
+      logStatusChange("Cooking Status", cooking);
+    }
+    
+    // If cooking is being set to true and shopStatus is already true
+    if (data.cooking === true && shopStatus === true) {
+      shopStatus = false; // Turn off shop status when cooking becomes true
       logStatusChange("Shop Status", shopStatus);
     }
-
+  
+    // Update the statuses after applying the constraints
+    if (data.shopStatus !== undefined) {
+      shopStatus = data.shopStatus;
+      logStatusChange("Shop Status", shopStatus);
+    }
+  
     if (data.cooking !== undefined) {
-      cooking = data.cooking; // Update cooking status
+      cooking = data.cooking;
       logStatusChange("Cooking Status", cooking);
     }
 
