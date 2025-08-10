@@ -15,6 +15,7 @@ const port = 3010;
 // Use CORS to allow all origins (or specify frontend domain if required)
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://localhost:5173",
   "http://10.0.2.2:3000",
   "http://10.0.2.2:3001",
   "https://swamy-hot-foods-client.vercel.app",
